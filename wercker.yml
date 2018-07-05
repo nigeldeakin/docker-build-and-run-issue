@@ -1,0 +1,19 @@
+build:
+  box: google/golang
+  steps:
+    - script:
+        name: Unit tests
+        code: go test ./...     
+    - internal/docker-build: 
+        dockerfile: Dockerfile 
+        image-name: image-12345
+    - internal/docker-run:
+        image: image-12345
+        name: container-12345     
+    - script: 
+        name: Wait for container to start 
+        code: | 
+          until $(curl --output /dev/null --silent --head --fail http://container-12345:5000); do printf '.'; sleep 5; done    
+    - internal/docker-kill:
+        name: container-12345               
+
